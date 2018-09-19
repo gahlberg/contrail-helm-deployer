@@ -48,6 +48,10 @@ spec:
           volumeMounts:
           - mountPath: /host/usr/bin
             name: host-usr-bin
+          - mountPath: /etc/contrail/ssl
+            name: ssl-dir
+          - mountPath: /etc/sysctl.conf
+            name: host-sysctl-conf
       containers:
       - name: contrail-configdb-nodemgr
         image: {{ .Values.global.images.tags.nodemgr | quote }}
@@ -66,6 +70,11 @@ spec:
           value: {{ .Values.global.contrail_env.CONFIGDB_CQL_PORT | default 9041 | quote }}
         - name: CASSANDRA_JMX_LOCAL_PORT
           value: {{ .Values.global.contrail_env.CONFIGDB_JMX_LOCAL_PORT | default 7200 | quote }}
+        - name: KEYSTONE_AUTH_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.keystone.admin }}
+              key: KEYSTONE_AUTH_ADMIN_PASSWORD
         volumeMounts:
         - mountPath: /mnt/docker.sock
           name: docker-unix-socket
@@ -92,4 +101,7 @@ spec:
       - name: ssl-dir
         hostPath:
           path: /etc/contrail/ssl
+      - name: host-sysctl-conf
+        hostPath:
+          path: /etc/sysctl.conf
 {{- end }}
